@@ -1,0 +1,163 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						2,
+						3,
+						4
+					],
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"build" : "RNCGeolocationSpec_autolinked_build",
+					"jsonFile" : "directory-RNCGeolocationSpec_autolinked_build-Debug-1cd69f2f58ee3ca48ce1.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "/Users/gimsangmi/Desktop/Mobile/storyuniverse/node_modules/@react-native-community/geolocation/android/build/generated/source/codegen/jni",
+					"targetIndexes" : 
+					[
+						1
+					]
+				},
+				{
+					"build" : "safeareacontext_autolinked_build",
+					"jsonFile" : "directory-safeareacontext_autolinked_build-Debug-91d2d8693e03d178fba5.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "/Users/gimsangmi/Desktop/Mobile/storyuniverse/node_modules/react-native-safe-area-context/android/src/main/jni",
+					"targetIndexes" : 
+					[
+						4
+					]
+				},
+				{
+					"build" : "RNShareSpec_autolinked_build",
+					"jsonFile" : "directory-RNShareSpec_autolinked_build-Debug-aa7463f4d2486f6e9984.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "/Users/gimsangmi/Desktop/Mobile/storyuniverse/node_modules/react-native-share/android/build/generated/source/codegen/jni",
+					"targetIndexes" : 
+					[
+						3
+					]
+				},
+				{
+					"build" : "RNCWebViewSpec_autolinked_build",
+					"jsonFile" : "directory-RNCWebViewSpec_autolinked_build-Debug-7720a3f696cf98baf716.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "/Users/gimsangmi/Desktop/Mobile/storyuniverse/node_modules/react-native-webview/android/build/generated/source/codegen/jni",
+					"targetIndexes" : 
+					[
+						2
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4
+					],
+					"name" : "appmodules",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "appmodules::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-appmodules-Debug-a1058a7d4a9e6c858580.json",
+					"name" : "appmodules",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "react_codegen_RNCGeolocationSpec::@1b959fcb56e23f7716ba",
+					"jsonFile" : "target-react_codegen_RNCGeolocationSpec-Debug-7fd00ecb3c78754f03a4.json",
+					"name" : "react_codegen_RNCGeolocationSpec",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 4,
+					"id" : "react_codegen_RNCWebViewSpec::@eb48929f9f7453740a6c",
+					"jsonFile" : "target-react_codegen_RNCWebViewSpec-Debug-63c9e3788f3323fa95e7.json",
+					"name" : "react_codegen_RNCWebViewSpec",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "react_codegen_RNShareSpec::@e6c4c2b5aedb2ea213b7",
+					"jsonFile" : "target-react_codegen_RNShareSpec-Debug-b67090b6cc8aa0c59264.json",
+					"name" : "react_codegen_RNShareSpec",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "react_codegen_safeareacontext::@7984cd80db47aa7b952a",
+					"jsonFile" : "target-react_codegen_safeareacontext-Debug-cfa2fd1bb57fe75186a9.json",
+					"name" : "react_codegen_safeareacontext",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/Users/gimsangmi/Desktop/Mobile/storyuniverse/android/app/.cxx/Debug/6m6f2o33/x86",
+		"source" : "/Users/gimsangmi/Desktop/Mobile/storyuniverse/node_modules/react-native/ReactAndroid/cmake-utils/default-app-setup"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 3
+	}
+}

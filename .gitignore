@@ -27,8 +27,6 @@ coverage/
 # expo(모바일)
 .expo/
 .expo-shared/
-android/
-ios/
 
 # web frameworks
 .vercel/

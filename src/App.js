@@ -1,16 +1,29 @@
-// App.js — WizMarketing WebView Bridge (push-only)
+// App.js —STORY UNIVERSE
 // deps: react-native-webview, @react-native-firebase/messaging, @notifee/react-native, react-native-share
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import '@react-native-firebase/app';
+
+
 import {
-  SafeAreaView, BackHandler, StyleSheet, Platform,Alert,
+  BackHandler, StyleSheet, Platform, Alert,
   Linking, LogBox, Animated, ToastAndroid, Easing,
+  StatusBar,
 } from 'react-native';
+
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+
 import { WebView } from 'react-native-webview';
-import messaging from '@react-native-firebase/messaging';
+
 import notifee from '@notifee/react-native';
 import Share from 'react-native-share';
+
+
+
+import '@react-native-firebase/app';
+import auth from '@react-native-firebase/auth';
+import messaging from '@react-native-firebase/messaging';
+// ★ ADD
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 import SplashScreenRN from './SplashScreenRN';
 
@@ -24,17 +37,20 @@ const App = () => {
   const [splashVisible, setSplashVisible] = useState(true);
   const splashStartRef = useRef(0);
   const splashFade = useRef(new Animated.Value(1)).current;
-
   const bootTORef = useRef(null);
-
+  const bootedRef = useRef(false);
   const backExitRef = useRef({ last: 0 });
-
   const [token, setToken] = useState('');
-
-
   const lastNavRef = useRef({ isRoot: false, path: '/', canGoBack: false });
 
   const lastNavStateRef = useRef({});      // 기본값은 객체
+
+
+  // ─────────── Google Sign-In 초기화 ───────────
+  GoogleSignin.configure({
+    webClientId: '552640991532-a0qb0la20a41imrs157jv2vh1fsdr8r2.apps.googleusercontent.com', // 🔑 복사한 web client ID
+    offlineAccess: true,
+  });
 
 
   useEffect(() => { LogBox.ignoreAllLogs(true); }, []);
@@ -75,11 +91,16 @@ useEffect(() => {
     } catch (e) { console.log('❌ postMessage error:', e); }
   }, []);
 
+  const safeSend = (type, payload) => {
+    try { sendToWeb(type, payload); } catch (e) { console.log('[SEND_ERROR]', e); }
+  };
 
 
 const handleWebReady = useCallback(() => {
   // 타임아웃 타이머 해제
   if (bootTORef.current) { clearTimeout(bootTORef.current); bootTORef.current = null; }
+  bootedRef.current = true;         // ✅ 이후부터는 스플래시 다시 안 띄움
+
   // ACK 보내기 (모니터링 페이지에서 받는 이벤트)
   sendToWeb('WEB_READY_ACK', { at: Date.now() });
   // 스플래시 해제
@@ -158,6 +179,92 @@ const handleWebError = useCallback((payload) => {
     replyPermissionStatus({ pushGranted: push });
   }, [ensureNotificationPermission, replyPermissionStatus]);
 
+  // ─────────── Google Sign-In (Native) ───────────
+  // ─────────── Google Sign-In (Native) ───────────
+  const handleStartSignin = useCallback(async (payload) => {
+    const provider = payload?.provider;
+    console.log('🔔 [SIGNIN] Start with provider=', provider);
+
+    try {
+      if (provider !== 'google') throw new Error('unsupported_provider');
+
+      // A. PlayServices 체크
+      try {
+        await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+        console.log('🔔 [SIGNIN] Play services OK');
+      } catch (e) {
+        console.log('❌ [SIGNIN] Play services error', e);
+      }
+
+      // B. 세션 정리
+      try { await GoogleSignin.signOut(); console.log('🔔 [SIGNIN] signed out'); } catch { }
+      try { await GoogleSignin.revokeAccess(); console.log('🔔 [SIGNIN] access revoked'); } catch { }
+
+      // C. 로그인
+      const res = await GoogleSignin.signIn();
+      console.log('🔔 [SIGNIN] Google response=', res);
+
+      let idToken = res?.idToken;
+
+      // D. 보강: 토큰 직접 획득
+      if (!idToken) {
+        try {
+          const tokens = await GoogleSignin.getTokens();
+          console.log('🔔 [SIGNIN] Tokens fallback=', tokens);
+          idToken = tokens?.idToken || null;
+        } catch (e) {
+          console.log('❌ [SIGNIN] getTokens error', e);
+        }
+      }
+      if (!idToken) throw new Error('no_id_token');
+
+      // E. Firebase Auth 연동
+      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+      const userCred = await auth().signInWithCredential(googleCredential);
+      console.log('🔔 [SIGNIN] Firebase user=', userCred.user);
+
+      safeSend('SIGNIN_RESULT', {
+        success: true,
+        provider: 'google',
+        user: {
+          uid: userCred.user.uid,
+          email: userCred.user.email,
+          displayName: userCred.user.displayName,
+          photoURL: userCred.user.photoURL,
+        },
+        expires_at: Date.now() + 6 * 3600 * 1000,
+      });
+    } catch (err) {
+      console.log('❌ [SIGNIN ERROR]', err);
+
+      const code =
+        (err && typeof err === 'object' && 'code' in err) ? err.code :
+          (String(err?.message || '').includes('no_id_token') ? 'no_id_token' : 'unknown_error');
+
+      safeSend('SIGNIN_RESULT', {
+        success: false,
+        provider,
+        error_code: code,
+        error_message: String(err?.message || err),
+      });
+    }
+  }, [sendToWeb]);
+
+
+  const handleStartSignout = useCallback(async () => {
+    try {
+      await auth().signOut();
+      sendToWeb('SIGNOUT_RESULT', { success: true });
+    } catch (err) {
+      sendToWeb('SIGNOUT_RESULT', {
+        success: false,
+        error_code: 'signout_error',
+        message: String(err?.message || err),
+      });
+    }
+  }, [sendToWeb]);
+
+
   const onMessageFromWeb = useCallback(async (e) => {
     try {
       const raw = e.nativeEvent.data;
@@ -172,11 +279,27 @@ const handleWebError = useCallback((payload) => {
         case 'WEB_ERROR':  await handleWebError(data.payload); break;
 
 
+        case 'START_SIGNIN': await handleStartSignin(data.payload); break;     // ★ ADD
+        case 'START_SIGNOUT': await handleStartSignout(); break;                // ★ ADD
+
         case 'CHECK_PERMISSION':    await handleCheckPermission(); break;
         case 'REQUEST_PERMISSION':  await handleRequestPermission(); break;
 
         case 'EXIT_APP': BackHandler.exitApp(); break;
 
+        case 'NAV_STATE': {
+          const nav = data.payload || {};
+          lastNavStateRef.current = {
+            isRoot: !!nav.isRoot,
+            path: nav.path ?? '',
+            canGoBackInWeb: nav.canGoBackInWeb === true || nav.canGoBack === true,
+            hasBlockingUI: !!nav.hasBlockingUI,
+            needsConfirm: !!nav.needsConfirm,
+          };
+          sendToWeb('NAV_STATE_ACK', { nav: lastNavStateRef.current, at: Date.now() });
+          break;
+        }
+          
 
         // 네이티브(MainActivity.onBackPressed)에서 전달되는 물리 뒤로키 이벤트
         case 'BACK_PRESSED': {
@@ -229,19 +352,31 @@ const handleWebError = useCallback((payload) => {
   }, [splashFade]);
 
   const onWebViewLoadStart = useCallback(() => {
-    showSplashOnce();
-    if (bootTORef.current) clearTimeout(bootTORef.current);
-    bootTORef.current = setTimeout(() => {
-      bootTORef.current = null;
-      sendToWeb('OFFLINE_FALLBACK', { reason: 'timeout', at: Date.now() });
-    }, BOOT_TIMEOUT_MS);
+    // showSplashOnce();
+    // if (bootTORef.current) clearTimeout(bootTORef.current);
+    // bootTORef.current = setTimeout(() => {
+    //   bootTORef.current = null;
+    //   sendToWeb('OFFLINE_FALLBACK', { reason: 'timeout', at: Date.now() });
+    // }, BOOT_TIMEOUT_MS);
+
+    if (!bootedRef.current) {               // ✅ 첫 부팅 때만 동작
+      showSplashOnce();
+      if (bootTORef.current) clearTimeout(bootTORef.current);
+       bootTORef.current = setTimeout(() => {
+         bootTORef.current = null;
+         sendToWeb('OFFLINE_FALLBACK', { reason: 'timeout', at: Date.now() });
+       }, BOOT_TIMEOUT_MS);
+      }
+    
   }, [showSplashOnce, sendToWeb]);
 
   return (
-    <SafeAreaView style={styles.container}>
+     <SafeAreaProvider>
+      <StatusBar translucent={false} backgroundColor="#fff" barStyle="dark-content" />
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <WebView
         ref={webViewRef}
-        source={{ uri: 'https://story-universe-d9b96.web.app/' }}
+          source={{ uri: 'https://dhmobile-a86e4.web.app' }}
         onMessage={onMessageFromWeb}
         onLoadStart={onWebViewLoadStart}
         onLoadProgress={({ nativeEvent }) => {
@@ -256,11 +391,13 @@ const handleWebError = useCallback((payload) => {
         style={{ backgroundColor: 'transparent' }}
       />
       {splashVisible && (
-        <Animated.View style={[StyleSheet.absoluteFill, { opacity: splashFade, backgroundColor: 'white' }]}>
+        <Animated.View style={[StyleSheet.absoluteFill, { opacity: splashFade, backgroundColor: 'white' }]} pointerEvents="none">
+            
           <SplashScreenRN />
         </Animated.View>
       )}
-    </SafeAreaView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 };
 

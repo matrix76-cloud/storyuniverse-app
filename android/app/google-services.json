@@ -12,7 +12,20 @@
           "package_name": "com.storyuniverse"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "552640991532-5kul9n5aaagvfu63ubpirstl3s1hrv92.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.storyuniverse",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "552640991532-a0qb0la20a41imrs157jv2vh1fsdr8r2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyALusjTYctrvgCaIIuhuenfYE46mGUq508"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "552640991532-a0qb0la20a41imrs157jv2vh1fsdr8r2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

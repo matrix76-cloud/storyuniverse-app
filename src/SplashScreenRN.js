@@ -5,11 +5,11 @@ import { View, Text, Image, StyleSheet, Animated, Easing } from 'react-native';
 export default function SplashScreenRN({
   onDone,
   minDuration = 2000,        // 기본 2초
-  brandBg = '#6A0DAD',       // 💜 배경 보라색
+  brandBg = '#e6c39e',       
   brandText = '#FFFFFF',     // 흰색 텍스트
   primary = '#FFFFFF',       // 흰색 도트
   logoSource,                 // 예: require('./assets/logo.png')
-  brandName = 'Story Universe',
+  brandName = 'DH 모빌리티',
 }) {
   const [visible, setVisible] = useState(true);
   const fade = useRef(new Animated.Value(0)).current;
